@@ -1,0 +1,21 @@
+name: 'Test - storage_account_tags'
+
+on:
+  push:
+    branches:
+    - 'gh-actions-test'
+    paths:
+    - .github/workflows/workflow_terraform_deploy.yml
+    - .github/workflows/resource_group.yml
+    - live/resource_group/*
+
+jobs:
+  dev-call-workflow-terraform-deploy:
+    if: github.ref == 'refs/heads/gh-actions-test'
+    name: 'Terraform - storage_account_tags - dev'
+    uses: ./.github/workflows/workflow_terraform_deploy.yml
+    with:
+      environment: dev
+      terraform_version: 1.9
+      working_directory: ./live/resource_group
+    secrets: inherit
