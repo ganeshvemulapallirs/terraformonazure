@@ -176,6 +176,7 @@ jobs:
       name: download plan file from terraform plan job
       with:
         name: ${{ env.tfplanTextArtifactName }}
+        path: ${{ runner.workspace }}
     
     - name: display file
       run: |
