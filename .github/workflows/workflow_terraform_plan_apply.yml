@@ -28,7 +28,7 @@ on:
         type: string
       planStageDependsOn:
         type: string
-        required: true
+        required: false
         default: ''
       stageNameSuffix:
         type: string
