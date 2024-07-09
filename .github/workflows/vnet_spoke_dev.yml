@@ -5,7 +5,7 @@ on:
     branches:
     - 'main'
     paths:
-    - .github/workflows/workflow_terraform_deploy.yml
+    - .github/workflows/workflow_terraform_plan_apply.yml
     - .github/workflows/vnet_spoke_dev.yml
     - live/vnet_spoke/ag360_dev_eastus2/*
 
