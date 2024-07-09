@@ -163,7 +163,7 @@ jobs:
       run: terraform show -no-color $tfplanPath >> $tfplanTextPath
 
     - name: Compare plan files
-      shell: powershell
+      shell: pwsh
       run: |
         # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
         # Continue if both plan text files are the same.
