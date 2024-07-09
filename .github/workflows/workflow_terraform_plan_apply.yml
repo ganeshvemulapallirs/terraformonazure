@@ -44,9 +44,9 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      tfplanPath: ${{ github.workspace }}\tfplan_${{ inputs.stageNameSuffix }}
+      tfplanPath: ${{ github.workspace }}/tfplan_${{ inputs.stageNameSuffix }}
       tfplanArtifactName: tfplan_${{ inputs.stageNameSuffix }}
-      tfplanTextPath: ${{ github.workspace }}\tfplan_${{ inputs.stageNameSuffix }}.txt
+      tfplanTextPath: ${{ github.workspace }}/tfplan_${{ inputs.stageNameSuffix }}.txt
       tfplanTextArtifactName: 'tfplantext_${{ inputs.stageNameSuffix  }}'
     runs-on: ${{ inputs.runs_on }}
     outputs:
