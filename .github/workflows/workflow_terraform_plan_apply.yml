@@ -95,6 +95,16 @@ jobs:
 
     - name: Terraform show
       run: terraform show -no-color $tfplanPath >> $tfplanTextPath
+    
+    - name: display file
+      run: |
+        pwd
+        ls -R
+
+        echo ${{ runner.workspace }}
+        ls ${{ runner.workspace }}
+        echo ${{ github.workspace }}
+        ls ${{ github.workspace }}
 
     - name: Publish tfplab
       uses: actions/upload-artifact@v4
