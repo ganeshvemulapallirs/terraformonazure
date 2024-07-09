@@ -19,7 +19,7 @@ on:
         required: false
         type: string
         default: '1.9'
-      working_directory:
+      workingDirectory:
         required: true
         type: string
       alwaysRun:
@@ -55,7 +55,7 @@ jobs:
     defaults:
       run:
         shell: ${{ inputs.defaults_shell }}
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: ${{ inputs.workingDirectory }}
 
     steps:
     - uses: actions/checkout@v4
@@ -128,7 +128,7 @@ jobs:
 #     defaults:
 #       run:
 #         shell: ${{ inputs.defaults_shell }}
-#         working-directory: ${{ inputs.working_directory }}
+#         working-directory: ${{ inputs.workingDirectory }}
 
 #     steps:
 #     - uses: actions/checkout@v4
