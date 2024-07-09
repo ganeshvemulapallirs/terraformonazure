@@ -187,17 +187,18 @@ jobs:
         ls ${{ runner.workspace }}
         echo ${{ github.workspace }}
         ls ${{ github.workspace }}
-    # - name: Compare plan files
-    #   run: |
-    #     # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
-    #     # Continue if both plan text files are the same.
-    #     # Throw an error if there's a difference, indicating there has been a change in Azure since the plan was created.
-    #     cmp $tfplanTextPath ${{ runner.workspace }}/$tfplanTextArtifactName/$tfplanArtifactName.txt
-    #     if [ $? -eq 1 ]; then
-    #         echo "##[error]Terraform plan is out-of-date. The Azure resources involved in the plan have been modified since the plan was generated. Run this workflow again to generate a new Terraform plan."
-    #     else
-    #         echo "Files are identical."
-    #     fi
+
+    - name: Compare plan files
+      run: |
+        # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
+        # Continue if both plan text files are the same.
+        # Throw an error if there's a difference, indicating there has been a change in Azure since the plan was created.
+        cmp $tfplanTextPath ${{ runner.workspace }}/$tfplanArtifactName.txt
+        if [ $? -eq 1 ]; then
+            echo "##[error]Terraform plan is out-of-date. The Azure resources involved in the plan have been modified since the plan was generated. Run this workflow again to generate a new Terraform plan."
+        else
+            echo "Files are identical."
+        fi
 
     # - name: Compare plan files
     #   shell: pwsh
