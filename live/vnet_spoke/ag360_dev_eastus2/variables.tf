@@ -10,6 +10,7 @@ variable "username" {
 
 variable "password" {
     description = "Password for Virtual Machines"
+    default = "Marse@45239"
 }
 
 variable "vmsize" {
