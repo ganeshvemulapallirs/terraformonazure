@@ -26,17 +26,12 @@ on:
         required: false
         default: 'false'
         type: string
-      planStageDependsOn:
-        type: string
-        required: false
-        default: ''
       stageNameSuffix:
         type: string
         required: true
 
 jobs:
   job-terraform-plan:
-    # needs: ${{ inputs.planStageDependsOn }}
     name: 'TF Plan - ${{ inputs.stageNameSuffix }}'
     environment: ${{ inputs.environment }}
     env:
@@ -96,16 +91,6 @@ jobs:
     - name: Terraform show
       run: terraform show -no-color $tfplanPath >> $tfplanTextPath
     
-    - name: display file
-      run: |
-        pwd
-        ls -R
-
-        echo ${{ runner.workspace }}
-        ls ${{ runner.workspace }}
-        echo ${{ github.workspace }}
-        ls ${{ github.workspace }}
-
     - name: Publish tfplab
       uses: actions/upload-artifact@v4
       with:
@@ -177,16 +162,6 @@ jobs:
       with:
         name: ${{ env.tfplanTextArtifactName }}
         path: ${{ runner.workspace }}
-    
-    - name: display file
-      run: |
-        pwd
-        ls -R
-
-        echo ${{ runner.workspace }}
-        ls ${{ runner.workspace }}
-        echo ${{ github.workspace }}
-        ls ${{ github.workspace }}
 
     - name: Compare plan files
       run: |
@@ -206,7 +181,7 @@ jobs:
     #     # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
     #     # Continue if both plan text files are the same.
     #     # Throw an error if there's a difference, indicating there has been a change in Azure since the plan was created.
-    #     fc.exe $tfplanTextPath ${{ runner.workspace }}/$tfplanTextArtifactName/$tfplanArtifactName.txt
+    #     fc.exe $tfplanTextPath ${{ runner.workspace }}/$tfplanArtifactName.txt
 
     #     # Use fc.exe exit code, which will be True if the files are the same
     #     if (-Not ($?)) {
