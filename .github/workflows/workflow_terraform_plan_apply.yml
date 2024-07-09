@@ -168,8 +168,14 @@ jobs:
         name: ${{ env.tfplanTextArtifactName }}
     
     - name: display file
-      run: ls -R
+      run: |
+        pwd
+        ls -R
 
+        echo ${{ runner.workspace }}
+        cd ${{ runner.workspace }} | ls -R
+        echo ${{ github.workspace }}
+        cd ${{ github.workspace }} | ls -R
     # - name: Compare plan files
     #   run: |
     #     # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
