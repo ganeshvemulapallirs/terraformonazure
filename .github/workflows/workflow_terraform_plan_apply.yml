@@ -1,0 +1,145 @@
+name: 'Resusable workflow - Terraform plan and apply'
+
+on:
+  workflow_call:
+    inputs:
+      # setup-terraform requires bash
+      defaults_shell:
+        required: false
+        type: string
+        default: bash
+      environment:
+        required: true
+        type: string
+      runs_on:
+        required: false
+        type: string
+        default: ubuntu-latest
+      terraform_version:
+        required: true
+        type: string
+      working_directory:
+        required: true
+        type: string
+      alwaysRun:
+        required: true
+        default: 'false'
+        type: string
+      planStageDependsOn:
+        type: string
+        required: true
+        default: ''
+      stageNameSuffix:
+        type: string
+        required: false
+
+jobs:
+  job-terraform-plan:
+    # needs: ${{ inputs.planStageDependsOn }}
+    name: 'TF Plan - ${{ inputs.stageNameSuffix }}'
+    environment: ${{ inputs.environment }}
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      tfplanPath: ${{ github.workspace }}\tfplan_${{ inputs.stageNameSuffix }}
+      tfplanArtifactName: tfplan_${{ inputs.stageNameSuffix }}
+      tfplanTextPath: ${{ github.workspace }}\tfplan_${{ inputs.stageNameSuffix }}.txt
+      tfplanTextArtifactName: 'tfplantext_${{ inputs.stageNameSuffix  }}'
+    runs-on: ${{ inputs.runs_on }}
+    outputs:
+      terraform_plan_exitcode: ${{ steps.step-terraform-plan.outputs.exitcode }}
+
+    defaults:
+      run:
+        shell: ${{ inputs.defaults_shell }}
+        working-directory: ${{ inputs.working_directory }}
+
+    steps:
+    - uses: actions/checkout@v4
+      name: checkout code
+
+    - uses: hashicorp/setup-terraform@v3
+      name: Terraform Install (${{ inputs.terraform_version }})
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
+        terraform_wrapper: false  # Set to false for `plan -detailed-exitcode` to work
+
+    - name: Configure access to private GitHub repo
+      run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com".insteadOf https://github.com
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    - name: Terraform Validate
+      run: terraform validate -no-color
+    
+    - name: Terraform Plan1
+      run: terraform plan -input=false -out $tfplanPath
+
+    - name: Terraform show
+      run: terraform show -no-color $tfplanPath >> $tfplanTextPath
+
+    - name: Publish tfplab
+      uses: actions/upload-artifact@v4
+      with:
+        name: $tfplanArtifactName
+        path: $tfplanPath
+
+    - name: Publish tfplab
+      uses: actions/upload-artifact@v4
+      with:
+        name: $tfplanTextArtifactName
+        path: $tfplanTextPath
+    # - name: Terraform Plan
+    #   id: step-terraform-plan
+    #   run: |
+    #     export exitcode=0
+    #     echo "BEFORE: exitcode = $exitcode"
+    #     terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
+    #     echo "AFTER: exitcode = $exitcode"
+
+    #     echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+
+    #     if [ $exitcode -eq 1 ]; then
+    #       echo "Error with Terraform Plan"
+    #       exit 1
+    #     else
+    #       exit 0
+    #     fi
+
+#   job-terraform-apply:
+#     name: 'Terraform Apply'
+#     if: needs.job-terraform-plan.outputs.terraform_plan_exitcode == 2
+#     env:
+#       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID}}
+#       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+#       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+#       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+#     runs-on: ${{ inputs.runs_on }}
+#     environment: ${{ inputs.environment }}
+#     needs: [job-terraform-plan]
+
+#     defaults:
+#       run:
+#         shell: ${{ inputs.defaults_shell }}
+#         working-directory: ${{ inputs.working_directory }}
+
+#     steps:
+#     - uses: actions/checkout@v4
+#     - uses: hashicorp/setup-terraform@v3
+#       with:
+#         terraform_version: ${{ inputs.terraform_version }}
+
+#     - name: Configure access to private GitHub repo
+#       run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com".insteadOf https://github.com
+
+#     - name: Terraform Init
+#       run: terraform init
+
+#     - name: Terraform Apply
+#       run: terraform apply -auto-approve -input=false

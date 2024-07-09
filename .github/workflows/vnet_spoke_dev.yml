@@ -1,0 +1,21 @@
+name: 'Terraform VNet Spoke Dev'
+
+on:
+  push:
+    branches:
+    - 'main'
+    paths:
+    - .github/workflows/workflow_terraform_deploy.yml
+    - .github/workflows/vnet_spoke_dev.yml
+    - live/vnet_spoke/ag360_dev_eastus2/*
+
+jobs:
+  dev-call-workflow-terraform-deploy:
+    if: github.ref == 'refs/heads/main'
+    name: 'Terraform - Vnet Spoke - Dev'
+    uses: ./.github/workflows/workflow_terraform_plan_apply.yml
+    with:
+      stageNameSuffix:  vnet_spoke_ag360_dev_eastus2
+      environment: dev
+      workingDirectory:  ./live/vnet_spoke/ag360_dev_eastus2
+    secrets: inherit
