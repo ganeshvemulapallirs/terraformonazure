@@ -88,14 +88,14 @@ jobs:
     - name: Publish tfplab
       uses: actions/upload-artifact@v4
       with:
-        name: $tfplanArtifactName
-        path: $tfplanPath
+        name: $(tfplanArtifactName)
+        path: $(tfplanPath)
 
     - name: Publish tfplab
       uses: actions/upload-artifact@v4
       with:
-        name: $tfplanTextArtifactName
-        path: $tfplanTextPath
+        name: $(tfplanTextArtifactName)
+        path: $(tfplanTextPath)
     # - name: Terraform Plan
     #   id: step-terraform-plan
     #   run: |
