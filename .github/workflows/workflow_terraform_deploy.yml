@@ -27,10 +27,10 @@ jobs:
     name: 'Terraform Plan'
     environment: ${{ inputs.environment }}
     env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_SPN_APP_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_SPN_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
     runs-on: ${{ inputs.runs_on }}
     outputs:
       terraform_plan_exitcode: ${{ steps.step-terraform-plan.outputs.exitcode }}
