@@ -173,9 +173,9 @@ jobs:
         ls -R
 
         echo ${{ runner.workspace }}
-        cd ${{ runner.workspace }} | ls -R
+        ls ${{ runner.workspace }}
         echo ${{ github.workspace }}
-        cd ${{ github.workspace }} | ls -R
+        ls ${{ github.workspace }}
     # - name: Compare plan files
     #   run: |
     #     # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
