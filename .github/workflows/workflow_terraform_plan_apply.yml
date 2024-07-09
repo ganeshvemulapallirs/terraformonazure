@@ -18,6 +18,7 @@ on:
       terraform_version:
         required: true
         type: string
+        default: '1.9'
       working_directory:
         required: true
         type: string
