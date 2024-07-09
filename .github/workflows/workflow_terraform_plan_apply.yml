@@ -168,7 +168,7 @@ jobs:
         # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
         # Continue if both plan text files are the same.
         # Throw an error if there's a difference, indicating there has been a change in Azure since the plan was created.
-        fc.exe $(tfplanTextPath) ${{ runner.workspace }}\$(tfplanTextArtifactName)\$(tfplanArtifactName).txt
+        fc.exe $tfplanTextPath ${{ runner.workspace }}/$tfplanTextArtifactName/$tfplanArtifactName.txt
 
         # Use fc.exe exit code, which will be True if the files are the same
         if (-Not ($?)) {
