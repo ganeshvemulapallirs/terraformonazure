@@ -73,14 +73,28 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    # - name: Terraform Format
-    #   run: terraform fmt -check
+    - name: Terraform Format
+      run: terraform fmt -check
 
     - name: Terraform Validate
       run: terraform validate -no-color
-    
-    - name: Terraform Plan1
-      run: terraform plan -input=false -out $tfplanPath
+
+    - name: Terraform Plan
+      id: step-terraform-plan
+      run: |
+        export exitcode=0
+        echo "BEFORE: exitcode = $exitcode"
+        terraform plan -detailed-exitcode -no-color -out $tfplanPath || export exitcode=$?
+        echo "AFTER: exitcode = $exitcode"
+
+        echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+
+        if [ $exitcode -eq 1 ]; then
+          echo "Error with Terraform Plan"
+          exit 1
+        else
+          exit 0
+        fi
 
     - name: Terraform show
       run: terraform show -no-color $tfplanPath >> $tfplanTextPath
@@ -96,51 +110,74 @@ jobs:
       with:
         name: ${{ env.tfplanTextArtifactName }}
         path: ${{ env.tfplanTextPath }}
-    # - name: Terraform Plan
-    #   id: step-terraform-plan
-    #   run: |
-    #     export exitcode=0
-    #     echo "BEFORE: exitcode = $exitcode"
-    #     terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
-    #     echo "AFTER: exitcode = $exitcode"
+ 
 
-    #     echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+  job-terraform-apply:
+    name: 'TF Apply - ${{ inputs.stageNameSuffix }}'
+    if: needs.job-terraform-plan.outputs.terraform_plan_exitcode == 2
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID}}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      tfplanPath: ${{ github.workspace }}/tfplan_${{ inputs.stageNameSuffix }}
+      tfplanTextPath: ${{ github.workspace }}/tfplan_${{ inputs.stageNameSuffix }}.txt
+      tfplanArtifactName: tfplan_${{ inputs.stageNameSuffix }}
+      tfplanTextArtifactName: 'tfplantext_${{ inputs.stageNameSuffix  }}'
+    runs-on: ${{ inputs.runs_on }}
+    environment: ${{ inputs.environment }}
+    needs: [job-terraform-plan]
 
-    #     if [ $exitcode -eq 1 ]; then
-    #       echo "Error with Terraform Plan"
-    #       exit 1
-    #     else
-    #       exit 0
-    #     fi
+    defaults:
+      run:
+        shell: ${{ inputs.defaults_shell }}
+        working-directory: ${{ inputs.workingDirectory }}
 
-#   job-terraform-apply:
-#     name: 'Terraform Apply'
-#     if: needs.job-terraform-plan.outputs.terraform_plan_exitcode == 2
-#     env:
-#       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID}}
-#       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-#       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-#       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-#     runs-on: ${{ inputs.runs_on }}
-#     environment: ${{ inputs.environment }}
-#     needs: [job-terraform-plan]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
 
-#     defaults:
-#       run:
-#         shell: ${{ inputs.defaults_shell }}
-#         working-directory: ${{ inputs.workingDirectory }}
+    - name: Configure access to private GitHub repo
+      run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com".insteadOf https://github.com
 
-#     steps:
-#     - uses: actions/checkout@v4
-#     - uses: hashicorp/setup-terraform@v3
-#       with:
-#         terraform_version: ${{ inputs.terraform_version }}
+    - name: Terraform Init
+      run: terraform init
+  
+    - name: Terraform Plan
+      id: terraform-plan
+      run: |
+        export exitcode=0
+        echo "BEFORE: exitcode = $exitcode"
+        terraform plan -detailed-exitcode -no-color -out $tfplanPath || export exitcode=$?
+        echo "AFTER: exitcode = $exitcode"
 
-#     - name: Configure access to private GitHub repo
-#       run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com".insteadOf https://github.com
+        echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
 
-#     - name: Terraform Init
-#       run: terraform init
+        if [ $exitcode -eq 1 ]; then
+          echo "Error with Terraform Plan"
+          exit 1
+        else
+          exit 0
+        fi
 
-#     - name: Terraform Apply
-#       run: terraform apply -auto-approve -input=false
+    - name: Terraform show
+      run: terraform show -no-color $tfplanPath >> $tfplanTextPath
+
+    - name: Compare plan files
+      shell: powershell
+      run: |
+        # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
+        # Continue if both plan text files are the same.
+        # Throw an error if there's a difference, indicating there has been a change in Azure since the plan was created.
+        fc.exe $(tfplanTextPath) ${{ runner.workspace }}\$(tfplanTextArtifactName)\$(tfplanArtifactName).txt
+
+        # Use fc.exe exit code, which will be True if the files are the same
+        if (-Not ($?)) {
+          Write-Output "##[error]Terraform plan is out-of-date. The Azure resources involved in the plan have been modified since the plan was generated. Run this workflow again to generate a new Terraform plan."
+            exit 1
+        }
+
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve -input=false
