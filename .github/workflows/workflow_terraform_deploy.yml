@@ -25,6 +25,7 @@ on:
 jobs:
   job-terraform-plan:
     name: 'Terraform Plan'
+    environment: ${{ inputs.environment }}
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_SPN_APP_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_SPN_SECRET }}
