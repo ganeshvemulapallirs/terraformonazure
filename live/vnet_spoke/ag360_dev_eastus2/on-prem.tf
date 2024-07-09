@@ -1,10 +1,10 @@
 locals {
     onprem-location       = "eastus"
-    onprem-resource-group = "onprem-vnet-rg"
+    onprem-resource-group = "onprem-vnet-rg-ganesh"
     prefix-onprem         = "onprem"
 }
 
-resource "azurerm_resource_group" "onprem-vnet-rg-ganesh" {
+resource "azurerm_resource_group" "onprem-vnet-rg" {
     name     = local.onprem-resource-group
     location = local.onprem-location
 }
