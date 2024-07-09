@@ -58,6 +58,9 @@ jobs:
 
     - name: Terraform Validate
       run: terraform validate -no-color
+    
+    - name: Terraform Plan1
+      run: terraform plan -input=false
 
     - name: Terraform Plan
       id: step-terraform-plan
