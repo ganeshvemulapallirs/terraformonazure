@@ -33,7 +33,7 @@ on:
 jobs:
   job-terraform-plan:
     name: 'TF Plan - ${{ inputs.stageNameSuffix }}'
-    environment: ${{ inputs.environment }}
+    # environment: ${{ inputs.environment }}
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -91,13 +91,13 @@ jobs:
     - name: Terraform show
       run: terraform show -no-color $tfplanPath >> $tfplanTextPath
     
-    - name: Publish tfplab
+    - name: Publish tfplanfile
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.tfplanArtifactName }}
         path: ${{ env.tfplanPath }}
 
-    - name: Publish tfplab
+    - name: Publish tfplantextfile
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.tfplanTextArtifactName }}
@@ -158,12 +158,12 @@ jobs:
       run: terraform show -no-color $tfplanPath >> $tfplanTextPath
     
     - uses: actions/download-artifact@master
-      name: download plan file from terraform plan job
+      name: Download plan file from terraform plan job
       with:
         name: ${{ env.tfplanTextArtifactName }}
         path: ${{ runner.workspace }}
 
-    - name: Compare plan files
+    - name: Compare plan files linux
       run: |
         # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
         # Continue if both plan text files are the same.
@@ -175,7 +175,7 @@ jobs:
             echo "Files are identical."
         fi
 
-    # - name: Compare plan files
+    # - name: Compare plan files windows
     #   shell: pwsh
     #   run: |
     #     # Compare the plan text file (from this stage) with the artifact plan text file (from the plan stage).
@@ -190,4 +190,4 @@ jobs:
     #     }
 
     # - name: Terraform Apply
-    #   run: terraform apply -auto-approve -input=false
+    #   run: terraform apply -auto-approve $tfplanPath

@@ -1,17 +1,17 @@
-name: 'Terraform VNet Spoke Dev'
+name: 'Terraform VNet Hub Prod'
 
 on:
   push:
     branches:
     - 'main'
     paths:
-    - .github/workflows/workflow_terraform_plan_apply.yml
     - .github/workflows/vnet_hub_prod.yml
     - live/vnet_hub/prod_eastus2/*
     - live/vnet_hub/prod_centralus/*
+    - modules/vnet_hub/*
 
 jobs:
-  vnet_hub_prod_eastus2-call-workflow-terraform-deploy:
+  vnet-hub-prod-eastus2-call-workflow-terraform-deploy:
     if: github.ref == 'refs/heads/main'
     name: 'Terraform - Vnet hub - prod eastus2'
     uses: ./.github/workflows/workflow_terraform_plan_apply.yml
@@ -21,7 +21,7 @@ jobs:
       workingDirectory:  ./live/vnet_hub/prod_eastus2
     secrets: inherit
 
-  vnet_hub_prod_centralus-call-workflow-terraform-deploy:
+  vnet-hub-prod-centralus-call-workflow-terraform-deploy:
     if: github.ref == 'refs/heads/main'
     name: 'Terraform - Vnet hub - prod centralus'
     uses: ./.github/workflows/workflow_terraform_plan_apply.yml
@@ -30,4 +30,4 @@ jobs:
       environment: prod
       workingDirectory:  ./live/vnet_hub/prod_centralus
     secrets: inherit
-    needs: [vnet_hub_prod_eastus2-call-workflow-terraform-deploy]
+    needs: [vnet-hub-prod-eastus2-call-workflow-terraform-deploy]

@@ -1,4 +1,4 @@
-name: 'Terraform VNet Spoke Dev'
+name: 'Terraform VNet Spoke Prod'
 
 on:
   push:
@@ -6,16 +6,16 @@ on:
     - 'main'
     paths:
     - .github/workflows/vnet_spoke_dev.yml
-    - live/vnet_spoke/ag360_dev_eastus2/*
+    - live/vnet_spoke/platform_prod_eastus2/*
     - modules/vnet_spoke/*
 
 jobs:
   vnet_spoke_dev-call-workflow-terraform-deploy:
     if: github.ref == 'refs/heads/main'
-    name: 'Terraform - Vnet Spoke - Dev'
+    name: 'Terraform - Vnet Spoke - Prod'
     uses: ./.github/workflows/workflow_terraform_plan_apply.yml
     with:
-      stageNameSuffix:  vnet_spoke_ag360_dev_eastus2
+      stageNameSuffix:  vnet_spoke_platform_prod_eastus2
       environment: dev
-      workingDirectory:  ./live/vnet_spoke/ag360_dev_eastus2
+      workingDirectory:  ./live/vnet_spoke/platform_prod_eastus2
     secrets: inherit

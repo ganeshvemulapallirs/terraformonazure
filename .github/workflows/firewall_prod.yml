@@ -1,0 +1,33 @@
+name: 'Terraform Firewall Prod'
+
+on:
+  push:
+    branches:
+    - 'main'
+    paths:
+    - .github/workflows/firewall_prod.yml
+    - live/firewall/prod_eastus2/*
+    - live/firewall/prod_centralus/*
+    - modules/firewall/*
+
+jobs:
+  firewall-prod-eastus2-call-workflow-terraform-deploy:
+    if: github.ref == 'refs/heads/main'
+    name: 'Terraform - firewall - prod eastus2'
+    uses: ./.github/workflows/workflow_terraform_plan_apply.yml
+    with:
+      stageNameSuffix:  firewall_prod_eastus2
+      environment: prod
+      workingDirectory:  ./live/firewall/prod_eastus2
+    secrets: inherit
+
+  firewall-prod-centralus-call-workflow-terraform-deploy:
+    if: github.ref == 'refs/heads/main'
+    name: 'Terraform - Vnet firewall centralus'
+    uses: ./.github/workflows/workflow_terraform_plan_apply.yml
+    with:
+      stageNameSuffix:  firewall_prod_centralus
+      environment: prod
+      workingDirectory:  ./live/firewall/prod_centralus
+    secrets: inherit
+    needs: [vnet-hub-prod-eastus2-call-workflow-terraform-deploy]
